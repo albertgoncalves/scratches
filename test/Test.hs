@@ -7,15 +7,15 @@ import Test.HUnit.Lang (Assertion)
 
 import NaiveBayes (Labels(..), examples, pipeline, tally, tokenize)
 
-test_tokenize :: Assertion
-test_tokenize =
+testTokenize :: Assertion
+testTokenize =
     assertEqual
         "assertEqual tokenize"
         (tokenize "5% Guaranteed for Eight Years")
         ["5", "guaranteed", "for", "eight", "years"]
 
-tests_tally :: [Assertion]
-tests_tally =
+testsTally :: [Assertion]
+testsTally =
     [ assertEqual
         "assertEqual tally True"
         (extract $ tally True "")
@@ -28,8 +28,8 @@ tests_tally =
   where
     extract (Labels (a, b, c)) = (a, b, c)
 
-test_pipeline :: Assertion
-test_pipeline =
+testPipeline :: Assertion
+testPipeline =
     assertEqual
         "assertEqual map show $ pipeline examples"
         (map show $ pipeline examples)
@@ -67,4 +67,4 @@ suite :: [Assertion] -> Test
 suite = TestList . map TestCase
 
 main :: IO Counts
-main = (runTestTT . suite) (test_tokenize : test_pipeline : tests_tally)
+main = (runTestTT . suite) (testTokenize : testPipeline : testsTally)
