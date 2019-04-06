@@ -22,7 +22,7 @@ instance Semigroup Label where
     Label (a, b, c) <> Label (a', b', _) = Label (a + a', b + b', c)
 
 instance Monoid Label where
-    mempty = Label (0, 0, mempty)
+    mempty = Label (0, 0, "[TOTAL]")
     mappend = (<>)
 
 instance Eq Proba where
@@ -30,6 +30,13 @@ instance Eq Proba where
 
 instance Ord Proba where
     Proba (_, _, c) `compare` Proba (_, _, c') = compare c c'
+
+instance Semigroup Proba where
+    Proba (a, b, c) <> Proba (a', b', _) = Proba(a + log(a'), b + log(b'), c)
+
+instance Monoid Proba where
+    mempty = Proba (0, 0, "[P]")
+    mappend = (<>)
 
 tokenize :: String -> [String]
 tokenize =
@@ -63,10 +70,12 @@ toProba k (Label (aTrue, aFalse, _)) (Label (bTrue, bFalse, b)) =
 mapProba :: Float -> [Label] -> [Proba]
 mapProba k xs = map (toProba k total) xs
   where
-    total = foldl mappend (Label (0, 0, "[TOTALS]")) xs
+    total = foldl mappend mempty xs
 
-classify :: String -> [Proba] -> Float
-classify = undefined
+classify :: String -> [Proba] -> Proba
+classify x = (foldl mappend mempty) . filter (`elem` xs)
+  where
+    xs = map (Proba . (,,) 0 0) (tokenize x)
 
 examples :: [(String, Bool)]
 examples =
