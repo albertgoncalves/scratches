@@ -51,7 +51,6 @@ def spam_proba(word_probs, message):
     message_words = tokenize(message)
     log_prob_if_spam = 0.0
     log_prob_if_not_spam = 0.0
-
     for word, prob_if_spam, prob_if_not_spam in word_probs:
         if word in message_words:
             log_prob_if_spam += log(prob_if_spam)
@@ -59,10 +58,8 @@ def spam_proba(word_probs, message):
         else:
             log_prob_if_spam += log(1.0 - prob_if_spam)
             log_prob_if_not_spam += log(1.0 - prob_if_not_spam)
-
     prob_if_spam = exp(log_prob_if_spam)
     prob_if_not_spam = exp(log_prob_if_not_spam)
-
     return prob_if_spam / (prob_if_spam + prob_if_not_spam)
 
 
@@ -85,16 +82,13 @@ def classify(word_probs, message):
 def load_data(path):
     path = r"{}/*/*".format(path)
     data = []
-
     for fp in glob(path):
         is_spam = "ham" not in fp
-
         with open(fp, "r", errors="ignore") as f:
             for line in f:
                 if line.startswith("Subject:"):
                     subject = sub(r"^Subject: ", "", line).strip()
                     data.append((subject, is_spam))
-
     return data
 
 
@@ -103,19 +97,14 @@ def main():
     k = 0.5
     data = load_data("data")
     train_data, test_data = split_data(data, 0.75)
-
     word_probs = train(train_data, k)
-
     f = lambda subject, is_spam: \
         (subject, is_spam, classify(word_probs, subject))
     classified = [f(subject, is_spam) for subject, is_spam in test_data]
-
     counts = \
         ((is_spam, spam_proba > 0.5) for _, is_spam, spam_proba in classified)
     counts = Counter(counts)
-
     words = sorted(word_probs, key=p_spam_given_word)
-
     print(counts)
     print(words[-5:])
     print(words[:5])
