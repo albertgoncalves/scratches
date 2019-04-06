@@ -15,10 +15,10 @@ with pkgs; mkShell {
         wget
     ];
     shellHook = ''
-        alias flake8="flake8 --ignore E124,E128,E201,E203,E241,E731,W503"
-        dir="data"
-        if [ ! -e ./$dir/ ]; then
-            mkdir $dir
+        if [ $(uname -s) = "Darwin" ]; then
+            alias ls='ls --color=auto'
+            alias ll='ls -al'
         fi
+        alias flake8="flake8 --ignore E124,E128,E201,E203,E241,E731,W503"
     '';
 }
