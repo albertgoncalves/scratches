@@ -3,10 +3,15 @@
 module NaiveBayes where
 
 import Data.Char (isAlphaNum, toLower)
+import Data.Function (on)
 import Data.List (group, partition, sort)
 
+mapTuple :: (b -> a) -> (b, b) -> (a, a)
+mapTuple = uncurry . on (,)
+
+{- / -}
+
 newtype Label = Label (Int, Int, String) deriving (Show)
-newtype Proba = Proba (Float, Float, String) deriving (Show)
 
 instance Eq Label where
     Label (_, _, c) == Label (_, _, c') = c == c'
@@ -18,8 +23,12 @@ instance Semigroup Label where
     Label (a, b, c) <> Label (a', b', _) = Label (a + a', b + b', c)
 
 instance Monoid Label where
-    mempty = Label (0, 0, "[TOTAL]")
+    mempty = Label (0, 0, mempty)
     mappend = (<>)
+
+{- / -}
+
+newtype Proba = Proba (Float, Float, String) deriving (Show)
 
 instance Eq Proba where
     Proba (_, _, c) == Proba (_, _, c') = c == c'
@@ -31,7 +40,7 @@ instance Semigroup Proba where
     Proba (a, b, c) <> Proba (a', b', _) = Proba(a + log a', b + log b', c)
 
 instance Monoid Proba where
-    mempty = Proba (0, 0, "[P]")
+    mempty = Proba (0, 0, mempty)
     mappend = (<>)
 
 instance Num Proba where
@@ -41,6 +50,8 @@ instance Num Proba where
     abs (Proba (a, b, c)) = Proba (abs a, abs b, c)
     signum (Proba (a, b, c)) = Proba (signum a, signum b, c)
     fromInteger = fromInteger
+
+{- / -}
 
 tokenize :: String -> [String]
 tokenize =
@@ -61,13 +72,10 @@ mapLabels =
     . concatMap (\(xs, b) -> map (tally b) (tokenize xs))
 
 toProba :: Float -> (Int, Int) -> Label -> Proba
-toProba k (totalTrue, totalFalse) (Label (xTrue, xFalse, x)) =
-    Proba (pTrue, pFalse, x)
+toProba k ts (Label (xTrue, xFalse, x)) = Proba (pTrue, pFalse, x)
   where
-    totalTrue' = fromIntegral totalTrue
-    totalFalse' = fromIntegral totalFalse
-    xTrue' = fromIntegral xTrue
-    xFalse' = fromIntegral xFalse
+    ((totalTrue', totalFalse'), (xTrue', xFalse')) =
+        mapTuple (mapTuple fromIntegral) (ts, (xTrue, xFalse))
     k' = 2 * k
     pTrue = (xTrue' + k) / (totalTrue' + k')
     pFalse = (xFalse' + k) / (totalFalse' + k')
@@ -86,11 +94,14 @@ classify x ys = (x, p / (p + q))
   where
     xs = map (Proba . (,,) 0 0) (tokenize x)
     (ps, qs) = partition (`elem` xs) ys
-    ps' = foldl mappend mempty ps
-    qs' = foldl mappend mempty (map (Proba (1, 1, mempty) -) qs)
+    (ps', qs') =
+        mapTuple
+            (foldl mappend mempty)
+            (ps, map (Proba (1, 1, mempty) -) qs)
     Proba (pTrue, pFalse, _) = ps' + qs'
-    p = exp pTrue
-    q = exp pFalse
+    (p, q) = mapTuple exp (pTrue, pFalse)
+
+{- / -}
 
 exTrue :: String
 exTrue = "Online Doctors will fill your Viagra Prescription Now!!! QEEB"
@@ -141,6 +152,8 @@ corpus =
     , ("Re: [VoID] a new low on the personals tip...", False)
     , ("Re: [SAtalk] SA and Patented Ideas (was: SA In The News)", False)
     ]
+
+{- / -}
 
 main :: IO ()
 main =
