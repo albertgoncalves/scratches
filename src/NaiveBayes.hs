@@ -53,7 +53,7 @@ instance Num Proba where
 tokenize :: String -> [String]
 tokenize =
     filter (/= "")
-    . map (filter (\x -> isAlphaNum x || x == '\''))
+    . map (filter $ \x -> isAlphaNum x || x == '\'')
     . words
     . map toLower
 
