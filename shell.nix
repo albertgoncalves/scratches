@@ -7,6 +7,11 @@ with pkgs; mkShell {
             numpy
             flake8
         ]))
+        (haskell.packages.ghc864.ghcWithPackages (pkgs: [
+            pkgs.regex-compat
+            pkgs.hlint
+            pkgs.hoogle
+        ]))
         wget
     ];
     shellHook = ''

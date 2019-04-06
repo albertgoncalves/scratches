@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
-from collections import Counter
-from collections import defaultdict
+from collections import Counter, defaultdict
 from glob import glob
-from math import exp
-from math import log
+from math import exp, log
 from random import seed
-from re import findall
-from re import sub
+from re import findall, sub
 
 from utils import split_data
 
