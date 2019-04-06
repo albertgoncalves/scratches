@@ -20,7 +20,7 @@ instance Ord Label where
     Label (_, _, c) `compare` Label (_, _, c') = compare c c'
 
 instance Semigroup Label where
-    Label (a, b, c) <> Label (a', b', _) = Label (a + a', b + b', c)
+    Label (a, b, _) <> Label (a', b', c') = Label (a + a', b + b', c')
 
 instance Monoid Label where
     mempty = Label (0, 0, mempty)
@@ -32,9 +32,6 @@ newtype Proba = Proba (Float, Float, String) deriving (Show)
 
 instance Eq Proba where
     Proba (_, _, c) == Proba (_, _, c') = c == c'
-
-instance Ord Proba where
-    Proba (_, _, c) `compare` Proba (_, _, c') = compare c c'
 
 instance Semigroup Proba where
     Proba (a, b, c) <> Proba (a', b', _) = Proba(a + log a', b + log b', c)
@@ -66,7 +63,7 @@ tally False = Label . (,,) 0 1
 
 mapLabels :: [(String, Bool)] -> [Label]
 mapLabels =
-    map (foldl1 mappend)
+    map (foldl mappend mempty)
     . group
     . sort
     . concatMap (\(xs, b) -> map (tally b) (tokenize xs))
