@@ -5,4 +5,5 @@
 !*.hs
 !*.sh
 !src/
+!test/
 !data/

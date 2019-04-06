@@ -1,31 +1,37 @@
 {-# OPTIONS_GHC -Wall #-}
 
-import Data.Char (toLower)
+module NaiveBayes where
+
+import Data.Char (isAlphaNum, toLower)
 import Data.List (group, sort)
 
-data Count = Count (Int, Int, String) deriving (Show)
+data Labels = Labels (Int, Int, String) deriving (Show)
 
-instance Eq Count where
-    Count (_, _, c) == Count (_, _, c') = c == c'
+instance Eq Labels where
+    Labels (_, _, c) == Labels (_, _, c') = c == c'
 
-instance Ord Count where
-    Count (_, _, c) `compare` Count (_, _, c') = compare c c'
+instance Ord Labels where
+    Labels (_, _, c) `compare` Labels (_, _, c') = compare c c'
 
-instance Semigroup Count where
-    Count (a, b, c) <> Count (a', b', _) = Count (a + a', b + b', c)
+instance Semigroup Labels where
+    Labels (a, b, c) <> Labels (a', b', _) = Labels (a + a', b + b', c)
 
-instance Monoid Count where
-    mempty = Count (0, 0, mempty)
+instance Monoid Labels where
+    mempty = Labels (0, 0, mempty)
     mappend = (<>)
 
 tokenize :: String -> [String]
-tokenize = words . map toLower
+tokenize =
+    filter (/= "")
+    . map (filter isAlphaNum)
+    . words
+    . map toLower
 
-tally :: Bool -> String -> Count
-tally True = Count . (,,) 1 0
-tally False = Count . (,,) 0 1
+tally :: Bool -> String -> Labels
+tally True = Labels . (,,) 1 0
+tally False = Labels . (,,) 0 1
 
-pipeline :: [(String, Bool)] -> [Count]
+pipeline :: [(String, Bool)] -> [Labels]
 pipeline =
     map (foldl1 mappend)
     . group
@@ -56,6 +62,3 @@ examples =
     , ("Re: [VoID] a new low on the personals tip...", False)
     , ("Re: [SAtalk] SA and Patented Ideas (was: SA In The News)", False)
     ]
-
-main :: IO ()
-main = mapM_ print (pipeline examples)

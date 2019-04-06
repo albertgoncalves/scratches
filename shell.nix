@@ -11,6 +11,7 @@ with pkgs; mkShell {
             pkgs.regex-compat
             pkgs.hlint
             pkgs.hoogle
+            pkgs.HUnit
         ]))
         wget
     ];
