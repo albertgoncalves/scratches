@@ -63,10 +63,8 @@ test_pipeline =
         , "Labels (1,0,\"years\")"
         ]
 
-tests :: Test
-tests =
-    (TestList . map TestCase)
-    (test_tokenize : test_pipeline : tests_tally)
+suite :: [Assertion] -> Test
+suite = TestList . map TestCase
 
 main :: IO Counts
-main = runTestTT tests
+main = (runTestTT . suite) (test_tokenize : test_pipeline : tests_tally)
