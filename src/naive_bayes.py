@@ -9,6 +9,53 @@ from re import findall, sub
 
 # via https://github.com/joelgrus/data-science-from-scratch
 
+EX_TRUE = "Outstanding Opportunities for 'Premier Producers'"
+EX_FALSE = "Re: The case for spam"
+
+CORPUS = \
+    [ ("Friend, Copy ANY DVD or Playstation Game with this software.", True)
+    , ("5% Guaranteed for Eight Years", True)
+    , ("Congratulations! You Get a Free Handheld Organizer!", True)
+    , ("One of a kind Money maker! Try it for free!", True)
+    , ("Online Doctors will fill your Viagra Prescription Now!!! QEEB", True)
+    , ("Take your Marketing to the Next Level", True)
+    , ("One Sale - Three Commission Streams", True)
+    , ("Find Peace, Harmony, Tranquility, And Happiness Right Now!", True)
+    , ("ADV: Extended Auto Warranties Here undoc", True)
+    , ("Definitely the answer many have been waiting for!!", True)
+    , ("Save $100's, maybe $1,000's with No Lender's Fees. Click here!", True)
+    , ("Get the Computer Skills you need - Free", True)
+    , ("[WM] CEVIRI YAZILIMLARI", True)
+    , ("Let me know what you think!32482", True)
+    , ("Garden Ornaments | ppu", True)
+    , ("A marketplace where lenders compete for your business LFHLXHU", True)
+    , ("Cheap Fags", True)
+    , ("Hey, rates are low. What are you waiting for?", True)
+    , ("One of a kind Money maker! Try it for free!", True)
+    , ("[ILUG-Social] Lose 22.5lbs in 3 weeks!", True)
+    , ("Re: traceback in new exmh", False)
+    , ("Re: The GOv gets tough on Net Users.....er Pirates..", False)
+    , ("Gold Lake Mountain Resort looks pretty gooood. Man there are a", False)
+    , ("Sheila Lennon was interviewed for the Times piece.", False)
+    , ("Re: Entrepreneurs", False)
+    , ("Re: bad focus/click behaviours", False)
+    , ("[Spambayes] test sets?", False)
+    , ("Hopes fade in Ulster crisis talks", False)
+    , ("UFOs in the Sky!", False)
+    , ("rpm-zzzlist@freshrpms.net", False)
+    , ("[Spambayes] spambayes package?", False)
+    , ("Re: The case for spam", False)
+    , ("[use Perl] Headlines for 2002-10-09", False)
+    , ("Sun Nabs Storage Startup - buys Pirus Networks", False)
+    , ("Re: [VoID] a new low on the personals tip...", False)
+    , ("RE: The absurdities of life.", False)
+    , ("RE: The absurdities of life.", False)
+    , ("[Spambayes] timtest broke?", False)
+    , ("public mailing list sign up package", False)
+    , ("Re: [VoID] a new low on the personals tip...", False)
+    , ("Re: [SAtalk] SA and Patented Ideas (was: SA In The News)", False)
+    ]
+
 
 def split_data(data, prob):
     results = [], []
@@ -91,56 +138,6 @@ def load_data(path):
                     subject = sub(r"^Subject: ", "", line).strip()
                     data.append((subject, is_spam))
     return data
-
-EX_TRUE = "Outstanding Opportunities for 'Premier Producers'"
-EX_FALSE = "Re: The case for spam"
-
-CORPUS = \
-    [ ('Friend, Copy ANY DVD or Playstation Game with this software......', True)
-    , ('5% Guaranteed for Eight Years', True)
-    , ('Congratulations! You Get a Free Handheld Organizer!', True)
-    , ('One of a kind Money maker! Try it for free!', True)
-    , ('Online Doctors will fill your Viagra Prescription Now!!!                QEEB', True)
-    , ('Take your Marketing to the Next Level', True)
-    , ('One Sale - Three Commission Streams', True)
-    , ('Find Peace, Harmony, Tranquility, And Happiness Right Now!', True)
-    , ('ADV: Extended Auto Warranties Here                                                    undoc', True)
-    , ('Definitely the answer many have been waiting for!!', True)
-    , ("Save $100's, maybe $1,000's with No Lender's Fees. Click here!", True)
-    , ('Get the Computer Skills you need - Free', True)
-    , ('[WM] CEVIRI YAZILIMLARI', True)
-    , ('Let me know what you think!32482', True)
-    , ('International calls for only 33 cents per minute with no subscription', True)
-    , ('Garden Ornaments | ppu', True)
-    , ('A marketplace where lenders compete for your business LFHLXHU', True)
-    , ('Cheap Fags', True)
-    , ('Hey, rates are low. What are you waiting for?', True)
-    , ('One of a kind Money maker! Try it for free!', True)
-    , ('=?iso-2022-jp?B?GyRCJDckOCRfJEgkYiRiJE4lMyVpJVwlbCE8JTclZyVzGyhK?=', True)
-    , ('[ILUG-Social] Lose 22.5lbs in 3 weeks!', True)
-    , ('Re: traceback in new exmh', False)
-    , ('Re: The GOv gets tough on Net Users.....er Pirates..', False)
-    , ('Gold Lake Mountain Resort looks pretty gooood. Man there are a', False)
-    , ('RE: Microsoft buys XDegress - more of a p2p/distributed data thing...', False)
-    , ('Sheila Lennon was interviewed for the Times piece.', False)
-    , ('Re: Entrepreneurs', False)
-    , ('Re: bad focus/click behaviours', False)
-    , ('[Spambayes] test sets?', False)
-    , ('Hopes fade in Ulster crisis talks', False)
-    , ('UFOs in the Sky!', False)
-    , ('rpm-zzzlist@freshrpms.net', False)
-    , ('[Spambayes] spambayes package?', False)
-    , ('Re: The case for spam', False)
-    , ('[use Perl] Headlines for 2002-10-09', False)
-    , ('Sun Nabs Storage Startup - buys Pirus Networks', False)
-    , ('Re: [VoID] a new low on the personals tip...', False)
-    , ('RE: The absurdities of life.', False)
-    , ('RE: The absurdities of life.', False)
-    , ('[Spambayes] timtest broke?', False)
-    , ('public mailing list sign up package', False)
-    , ('Re: [VoID] a new low on the personals tip...', False)
-    , ('Re: [SAtalk] SA and Patented Ideas (was: SA In The News)', False)
-    ]
 
 
 def main():
