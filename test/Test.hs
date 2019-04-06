@@ -5,7 +5,8 @@ module Main where
 import Test.HUnit (assertEqual, Counts, runTestTT, Test(TestCase, TestList))
 import Test.HUnit.Lang (Assertion)
 
-import NaiveBayes (Labels(..), examples, pipeline, tally, tokenize)
+import NaiveBayes (Label(..), Proba(..), examples, mapProba, pipeline, tally,
+    tokenize, toProba)
 
 testTokenize :: Assertion
 testTokenize =
@@ -26,45 +27,68 @@ testsTally =
         (0, 1, "")
     ]
   where
-    extract (Labels (a, b, c)) = (a, b, c)
+    extract (Label (a, b, c)) = (a, b, c)
 
-testPipeline :: Assertion
-testPipeline =
-    assertEqual
+testsPipeline :: [Assertion]
+testsPipeline =
+    [ assertEqual
         "assertEqual map show $ pipeline examples"
         (map show $ pipeline examples)
-        [ "Labels (1,0,\"5\")"
-        , "Labels (0,2,\"absurdities\")"
-        , "Labels (0,1,\"and\")"
-        , "Labels (1,0,\"any\")"
-        , "Labels (1,0,\"copy\")"
-        , "Labels (1,0,\"dvd\")"
-        , "Labels (1,0,\"eight\")"
-        , "Labels (1,0,\"for\")"
-        , "Labels (1,0,\"friend\")"
-        , "Labels (1,0,\"game\")"
-        , "Labels (1,0,\"guaranteed\")"
-        , "Labels (0,1,\"ideas\")"
-        , "Labels (0,1,\"in\")"
-        , "Labels (0,2,\"life\")"
-        , "Labels (0,1,\"news\")"
-        , "Labels (0,2,\"of\")"
-        , "Labels (1,0,\"or\")"
-        , "Labels (0,1,\"patented\")"
-        , "Labels (1,0,\"playstation\")"
-        , "Labels (0,3,\"re\")"
-        , "Labels (0,2,\"sa\")"
-        , "Labels (0,1,\"satalk\")"
-        , "Labels (1,0,\"software\")"
-        , "Labels (0,3,\"the\")"
-        , "Labels (1,0,\"this\")"
-        , "Labels (0,1,\"was\")"
-        , "Labels (1,0,\"with\")"
-        , "Labels (1,0,\"years\")"
+        [ "Label (1,0,\"5\")"
+        , "Label (0,2,\"absurdities\")"
+        , "Label (0,1,\"and\")"
+        , "Label (1,0,\"any\")"
+        , "Label (1,0,\"copy\")"
+        , "Label (1,0,\"dvd\")"
+        , "Label (1,0,\"eight\")"
+        , "Label (1,0,\"for\")"
+        , "Label (1,0,\"friend\")"
+        , "Label (1,0,\"game\")"
+        , "Label (1,0,\"guaranteed\")"
+        , "Label (0,1,\"ideas\")"
+        , "Label (0,1,\"in\")"
+        , "Label (0,2,\"life\")"
+        , "Label (0,1,\"news\")"
+        , "Label (0,2,\"of\")"
+        , "Label (1,0,\"or\")"
+        , "Label (0,1,\"patented\")"
+        , "Label (1,0,\"playstation\")"
+        , "Label (0,3,\"re\")"
+        , "Label (0,2,\"sa\")"
+        , "Label (0,1,\"satalk\")"
+        , "Label (1,0,\"software\")"
+        , "Label (0,3,\"the\")"
+        , "Label (1,0,\"this\")"
+        , "Label (0,1,\"was\")"
+        , "Label (1,0,\"with\")"
+        , "Label (1,0,\"years\")"
         ]
+    , assertEqual
+        "assertEqual pipeline []"
+        (pipeline [])
+        []
+    ]
 
-suite :: [Assertion] -> Test
-suite = TestList . map TestCase
+testToProba :: Assertion
+testToProba =
+    assertEqual
+        "toProba ..."
+        (toProba k (Label (10, 5, "[TOTAL]")) (Label (1, 3, "word")))
+        $ Proba ((1 + k) / (10 + (2 * k)), (3 + k) / (5 + (2 * k)), "word")
+  where
+    k = 1
+
+testMapProba :: Assertion
+testMapProba =
+    assertEqual
+        "mapProba ..."
+        (show $ mapProba 1 [Label (1, 5, "foo"), Label (5, 9, "bar")])
+        "[Proba (0.25,0.375,\"foo\"),Proba (0.75,0.625,\"bar\")]"
 
 main :: IO Counts
-main = (runTestTT . suite) (testTokenize : testPipeline : testsTally)
+main = (runTestTT . TestList . map TestCase) tests
+  where
+    tests =
+        [testTokenize, testToProba, testMapProba]
+        ++ testsTally
+        ++ testsPipeline

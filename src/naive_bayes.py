@@ -40,8 +40,8 @@ def count_words(training_set):
 
 def word_proba(counts, total_spams, total_non_spams, k=0.5):
     def p(word, spam, non_spam):
-        prob_if_spam = (spam + k) / (total_spams + 2 * k)
-        prob_if_not_spam = (non_spam + k) / (total_non_spams + 2 * k)
+        prob_if_spam = (spam + k) / (total_spams + (2 * k))
+        prob_if_not_spam = (non_spam + k) / (total_non_spams + (2 * k))
         return (word, prob_if_spam, prob_if_not_spam)
 
     return [p(w, spam, non_spam) for w, (spam, non_spam) in counts.items()]
