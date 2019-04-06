@@ -5,8 +5,8 @@ module Main where
 import Test.HUnit (assertEqual, Counts, runTestTT, Test(TestCase, TestList))
 import Test.HUnit.Lang (Assertion)
 
-import NaiveBayes (Label(..), Proba(..), examples, mapLabels, mapProba, tally,
-    tokenize, toProba)
+import NaiveBayes (Label(..), examples, mapLabels, mapProba, tally, tokenize,
+    toProba)
 
 testTokenize :: Assertion
 testTokenize =
@@ -73,8 +73,8 @@ testToProba :: Assertion
 testToProba =
     assertEqual
         "toProba ..."
-        (toProba k (Label (10, 5, "[TOTAL]")) (Label (1, 3, "word")))
-        $ Proba ((1 + k) / (10 + (2 * k)), (3 + k) / (5 + (2 * k)), "word")
+        (show $ toProba k (Label (8, 6, "[TOTAL]")) (Label (1, 3, "word")))
+        "Proba (0.2,0.5,\"word\")"
   where
     k = 1
 

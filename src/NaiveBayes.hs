@@ -7,7 +7,7 @@ import Data.Function (on)
 import Data.List (group, sort)
 
 data Label = Label (Int, Int, String) deriving (Show)
-data Proba = Proba (Float, Float, String) deriving (Eq, Show)
+data Proba = Proba (Float, Float, String) deriving (Show)
 
 mapTuple :: (b -> a) -> (b, b) -> (a, a)
 mapTuple = uncurry . on (,)
@@ -24,6 +24,12 @@ instance Semigroup Label where
 instance Monoid Label where
     mempty = Label (0, 0, mempty)
     mappend = (<>)
+
+instance Eq Proba where
+    Proba (_, _, c) == Proba (_, _, c') = c == c'
+
+instance Ord Proba where
+    Proba (_, _, c) `compare` Proba (_, _, c') = compare c c'
 
 tokenize :: String -> [String]
 tokenize =
