@@ -5,7 +5,7 @@ module Main where
 import Test.HUnit (assertEqual, Counts, runTestTT, Test(TestCase, TestList))
 import Test.HUnit.Lang (Assertion)
 
-import NaiveBayes (Label(..), Proba(..), examples, mapProba, pipeline, tally,
+import NaiveBayes (Label(..), Proba(..), examples, mapLabels, mapProba, tally,
     tokenize, toProba)
 
 testTokenize :: Assertion
@@ -32,8 +32,8 @@ testsTally =
 testsPipeline :: [Assertion]
 testsPipeline =
     [ assertEqual
-        "assertEqual map show $ pipeline examples"
-        (map show $ pipeline examples)
+        "assertEqual map show $ mapLabels examples"
+        (map show $ mapLabels examples)
         [ "Label (1,0,\"5\")"
         , "Label (0,2,\"absurdities\")"
         , "Label (0,1,\"and\")"
@@ -64,8 +64,8 @@ testsPipeline =
         , "Label (1,0,\"years\")"
         ]
     , assertEqual
-        "assertEqual pipeline []"
-        (pipeline [])
+        "assertEqual mapLabels []"
+        (mapLabels [])
         []
     ]
 

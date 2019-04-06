@@ -36,8 +36,8 @@ tally :: Bool -> String -> Label
 tally True = Label . (,,) 1 0
 tally False = Label . (,,) 0 1
 
-pipeline :: [(String, Bool)] -> [Label]
-pipeline =
+mapLabels :: [(String, Bool)] -> [Label]
+mapLabels =
     map (foldl1 mappend)
     . group
     . sort
