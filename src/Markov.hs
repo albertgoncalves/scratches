@@ -69,12 +69,17 @@ generate xs (Just (k, g)) =
   where
     (k', g') = random g :: (Float, TFGen)
 
-sentence :: Int -> [Maybe (String, TFGen)] -> String
-sentence n =
+sentence
+    :: Int
+    -> (Maybe (String, a) -> Maybe (String, a))
+    -> Maybe (String, a)
+    -> String
+sentence n f =
     unwords
     . map (map toLower . fst)
     . catMaybes
     . take n
+    . iterate f
 
 {- / -}
 
@@ -84,8 +89,8 @@ example = "Still less must this kind of contentment, which holds science in cont
 {- / -}
 
 main :: IO ()
-main = (print . sentence n) (iterate xs seed)
+main = (print . sentence n f) seed
   where
-    seed = Just ("and", seedTFGen (0, 0, 0, 0))
-    xs = (generate . chain . tokenize) example
+    seed = Just ("god", seedTFGen (0, 0, 0, 0))
+    f = (generate . chain . tokenize) example
     n = 24
