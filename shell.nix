@@ -8,7 +8,7 @@ with pkgs; mkShell {
             flake8
         ]))
         (haskell.packages.ghc864.ghcWithPackages (pkgs: [
-            pkgs.regex-compat
+            pkgs.random
             pkgs.hlint
             pkgs.hoogle
             pkgs.HUnit
