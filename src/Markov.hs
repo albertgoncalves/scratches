@@ -12,6 +12,13 @@ import System.Random.TF (TFGen, seedTFGen)
 
 {- / -}
 
+tokenize :: String -> [String]
+tokenize =
+    filter (/= "")
+    . map (filter $ \x -> isAlphaNum x || x == '\'')
+    . words
+    . map toLower
+
 tally :: [String] -> (Int, [(String, Int)])
 tally =
     (\xs -> (sum $ map snd xs, xs))
@@ -22,29 +29,28 @@ tally =
 arrange :: (Int, [(String, Int)]) -> String -> (String, [(String, Int, Int)])
 arrange (n, xs) = (, map (\(s, x) -> (s, x, n)) xs)
 
-cumsum :: (String, Int, Int) -> (String, Int, Int) -> (String, Int, Int)
-cumsum (_, x, _) (s, x', n) = (s, x + x', n)
+accumulate :: (String, Int, Int) -> (String, Int, Int) -> (String, Int, Int)
+accumulate (_, x, _) (s, x', n) = (s, x + x', n)
 
-percent :: (String, Int, Int) -> (Float, String)
-percent (s, x, n) = (fromIntegral x / fromIntegral n, s)
+toFraction :: (String, Int, Int) -> (Float, String)
+toFraction (s, x, n) = (fromIntegral x / fromIntegral n, s)
 
-pairsToDict :: [(String, String)] -> (String, Map Float String)
-pairsToDict =
-    (\(x, xs) -> (x, (fromDistinctAscList . map percent . scanl1 cumsum) xs))
+encode :: [(String, Int, Int)] -> Map Float String
+encode =
+    fromDistinctAscList
+    . map toFraction
+    . scanl1 accumulate
+
+pairTransform :: [(String, String)] -> (String, Map Float String)
+pairTransform =
+    (\(x, xs) -> (x, encode xs))
     .  uncurry arrange
     . (\xs -> (tally $ map snd xs, fst $ head xs))
-
-tokenize :: String -> [String]
-tokenize =
-    filter (/= "")
-    . map (filter $ \x -> isAlphaNum x || x == '\'')
-    . words
-    . map toLower
 
 chain :: [String] -> Map String (Map Float String)
 chain =
     fromDistinctAscList
-    . map pairsToDict
+    . map pairTransform
     . groupBy ((==) `on` fst)
     . sortBy (compare `on` fst)
     . (\xs -> zip xs $ tail xs)
@@ -61,12 +67,12 @@ generate xs (Just (k, g)) =
   where
     (k', g') = random g
 
-sentence
+writeSentence
     :: Int
     -> (Maybe (String, a) -> Maybe (String, a))
     -> Maybe (String, a)
     -> String
-sentence n f =
+writeSentence n f =
     unwords
     . map fst
     . catMaybes
@@ -81,7 +87,7 @@ example = "Still less must this kind of contentment, which holds science in cont
 {- / -}
 
 main :: IO ()
-main = (print . sentence n f) seed
+main = (print . writeSentence n f) seed
   where
     seed = Just ("god", seedTFGen (0, 0, 0, 0))
     f = (generate . chain . tokenize) example
