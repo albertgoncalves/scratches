@@ -1,12 +1,12 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE TupleSections #-}
 
-import Prelude hiding (lookup)
 import Data.Char (isAlphaNum, toLower)
 import Data.Function (on)
 import Data.List (group, groupBy, sort, sortBy)
-import Data.Map.Strict (Map, fromList, lookup, lookupGE)
+import Data.Map.Strict (Map, fromDistinctAscList, lookup, lookupGE)
 import Data.Maybe (catMaybes)
+import Prelude hiding (lookup)
 import System.Random (random)
 import System.Random.TF (TFGen, seedTFGen)
 
@@ -30,7 +30,7 @@ percent (s, x, n) = (fromIntegral x / fromIntegral n, s)
 
 pairsToDict :: [(String, String)] -> (String, Map Float String)
 pairsToDict =
-    (\(x, xs) -> (x, (fromList . map percent . scanl1 cumsum) xs))
+    (\(x, xs) -> (x, (fromDistinctAscList . map percent . scanl1 cumsum) xs))
     .  uncurry arrange
     . (\xs -> (tally $ map snd xs, fst $ head xs))
 
@@ -43,7 +43,7 @@ tokenize =
 
 chain :: [String] -> Map String (Map Float String)
 chain =
-    fromList
+    fromDistinctAscList
     . map pairsToDict
     . groupBy ((==) `on` fst)
     . sortBy (compare `on` fst)
@@ -68,7 +68,7 @@ sentence
     -> String
 sentence n f =
     unwords
-    . map (map toLower . fst)
+    . map fst
     . catMaybes
     . take n
     . iterate f

@@ -8,6 +8,7 @@ with pkgs; mkShell {
             flake8
         ]))
         (haskell.packages.ghc864.ghcWithPackages (pkgs: [
+            pkgs.containers
             pkgs.random
             pkgs.tf-random
             pkgs.hlint
