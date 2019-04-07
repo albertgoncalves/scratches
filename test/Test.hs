@@ -6,7 +6,7 @@ import Test.HUnit (assertEqual, Counts, runTestTT, Test(TestCase, TestList))
 import Test.HUnit.Lang (Assertion)
 
 import NaiveBayes (Label(..), classify, corpus, exTrue, exFalse, mapLabels,
-    mapProba, tally, tokenize, toProba, train)
+    tally, tokenize, toProba, train)
 
 testTokenize :: Assertion
 testTokenize =
@@ -80,18 +80,11 @@ testToProba =
   where
     k = 1
 
-testMapProba :: Assertion
-testMapProba =
-    assertEqual
-        "mapProba ..."
-        (show $ mapProba 1 (6, 14) [Label (1, 5, "foo"), Label (5, 9, "bar")])
-        "[Proba (0.25,0.375,\"foo\"),Proba (0.75,0.625,\"bar\")]"
-
 testTrain :: Assertion
 testTrain =
     assertEqual
-        "train (take 5 corpus)"
-        (map show $ train (take 5 corpus))
+        "train 0.5 (take 5 corpus)"
+        (map show $ train 0.5 (take 5 corpus))
             [ "Proba (0.25,0.5,\"5\")"
             , "Proba (0.41666666,0.5,\"a\")"
             , "Proba (0.25,0.5,\"commission\")"
@@ -127,13 +120,13 @@ testTrain =
 testsClassify :: [Assertion]
 testsClassify =
     [ assertEqual
-        "classify exTrue $ train corpus"
-        (show $ classify exTrue $ train corpus)
+        "classify exTrue $ train 0.5 corpus"
+        (show $ classify (train 0.5 corpus) exTrue)
         "(\"Online Doctors will fill your Viagra Prescription Now!!! QEEB\",\
             \0.8480228)"
     , assertEqual
-        "classify exFalse $ train corpus"
-        (show $ classify exFalse $ train corpus)
+        "classify exFalse $ train 0.5 corpus"
+        (show $ classify (train 0.5 corpus) exFalse)
         "(\"RE: Microsoft buys XDegress - more of a p2p/distributed data \
             \thing\",4.7495705e-3)"
     ]
@@ -142,7 +135,7 @@ main :: IO Counts
 main = (runTestTT . TestList . map TestCase) tests
   where
     tests =
-        [testTokenize, testToProba, testMapProba, testTrain]
+        [testTokenize, testToProba, testTrain]
         ++ testsTally
         ++ testsMapLabels
         ++ testsClassify

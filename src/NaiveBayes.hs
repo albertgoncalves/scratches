@@ -77,34 +77,23 @@ toProba k ts (Label (xTrue, xFalse, x)) = Proba (pTrue, pFalse, x)
     pTrue = (xTrue' + k) / (totalTrue' + k')
     pFalse = (xFalse' + k) / (totalFalse' + k')
 
-mapProba :: Float -> (Int, Int) -> [Label] -> [Proba]
-mapProba k ts = map (toProba k ts)
-
-train :: [(String, Bool)] -> [Proba]
-train xs = (mapProba 0.5 (totalTrue, totalFalse) . mapLabels) xs
+train :: Float -> [(String, Bool)] -> [Proba]
+train k xs = map (toProba k (totalTrue, totalFalse)) $ mapLabels xs
   where
-    totalTrue = (length . filter snd) xs
+    totalTrue = length $ filter snd xs
     totalFalse = length xs - totalTrue
 
-classify :: String -> [Proba] -> (String, Float)
-classify x ys = (x, p / (p + q))
+classify :: [Proba] -> String -> (String, Float)
+classify ys x = (x, p / (p + q))
   where
-    xs = map (Proba . (,,) 0 0) (tokenize x)
+    xs = map (Proba . (,,) 0 0) $ tokenize x
     (ps, qs) = partition (`elem` xs) ys
     (ps', qs') =
-        mapTuple
-            (foldl mappend mempty)
-            (ps, map (Proba (1, 1, mempty) -) qs)
+        mapTuple (foldl mappend mempty) (ps, map (Proba (1, 1, mempty) -) qs)
     Proba (pTrue, pFalse, _) = ps' + qs'
     (p, q) = mapTuple exp (pTrue, pFalse)
 
 {- / -}
-
-exTrue :: String
-exTrue = "Online Doctors will fill your Viagra Prescription Now!!! QEEB"
-
-exFalse :: String
-exFalse = "RE: Microsoft buys XDegress - more of a p2p/distributed data thing"
 
 corpus :: [(String, Bool)]
 corpus =
@@ -150,9 +139,16 @@ corpus =
     , ("Re: [SAtalk] SA and Patented Ideas (was: SA In The News)", False)
     ]
 
+exTrue :: String
+exTrue = "Online Doctors will fill your Viagra Prescription Now!!! QEEB"
+
+exFalse :: String
+exFalse = "RE: Microsoft buys XDegress - more of a p2p/distributed data thing"
+
 {- / -}
 
 main :: IO ()
-main =
-    mapM_ print (train corpus)
-    >> mapM_ (print . (\ex -> classify ex (train corpus))) [exTrue, exFalse]
+main = mapM_ print train' >> mapM_ (print . classify train') xs
+  where
+    train' = train 0.5 corpus
+    xs = [exTrue, exFalse]
