@@ -69,10 +69,10 @@ mapLabels =
     . concatMap (\(xs, b) -> map (tally b) (tokenize xs))
 
 toProba :: Float -> (Int, Int) -> Label -> Proba
-toProba k ts (Label (xTrue, xFalse, x)) = Proba (pTrue, pFalse, x)
+toProba k totals (Label (xTrue, xFalse, x)) = Proba (pTrue, pFalse, x)
   where
     ((totalTrue', totalFalse'), (xTrue', xFalse')) =
-        mapTuple (mapTuple fromIntegral) (ts, (xTrue, xFalse))
+        mapTuple (mapTuple fromIntegral) (totals, (xTrue, xFalse))
     k' = 2 * k
     pTrue = (xTrue' + k) / (totalTrue' + k')
     pFalse = (xFalse' + k) / (totalFalse' + k')
