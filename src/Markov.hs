@@ -59,7 +59,7 @@ generate xs (Just (k, g)) =
     >>= lookupGE k'
     >>= \(_, v) -> return (v, g')
   where
-    (k', g') = random g :: (Float, TFGen)
+    (k', g') = random g
 
 sentence
     :: Int
