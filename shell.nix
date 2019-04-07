@@ -9,6 +9,7 @@ with pkgs; mkShell {
         ]))
         (haskell.packages.ghc864.ghcWithPackages (pkgs: [
             pkgs.random
+            pkgs.tf-random
             pkgs.hlint
             pkgs.hoogle
             pkgs.HUnit

@@ -5,8 +5,10 @@ import Prelude hiding (lookup)
 import Data.Char (isAlphaNum, toLower)
 import Data.Function (on)
 import Data.List (group, groupBy, sort, sortBy)
-import Data.Map.Strict (Map, keys, fromList, lookup, lookupGE)
-import System.Random (randomIO)
+import Data.Map.Strict (Map, fromList, lookup, lookupGE)
+import Data.Maybe (catMaybes)
+import System.Random (random)
+import System.Random.TF (TFGen, seedTFGen)
 
 {- / -}
 
@@ -43,7 +45,7 @@ pairsToDict =
 tokenize :: String -> [String]
 tokenize =
     filter (/= "")
-    . map (filter (\x -> isAlphaNum x || x == '\''))
+    . map (filter $ \x -> isAlphaNum x || x == '\'')
     . words
     . map toLower
 
@@ -55,27 +57,35 @@ chain =
     . sortBy (compare `on` fst)
     . (\xs -> zip xs $ tail xs)
 
+generate
+    :: Map String (Map Float String)
+    -> Maybe (String, TFGen)
+    -> Maybe (String, TFGen)
+generate _ Nothing = Nothing
+generate xs (Just (k, g)) =
+    lookup k xs
+    >>= lookupGE k'
+    >>= \(_, v) -> return (v, g')
+  where
+    (k', g') = random g :: (Float, TFGen)
+
+sentence :: Int -> [Maybe (String, TFGen)] -> String
+sentence n =
+    unwords
+    . map (map toLower . fst)
+    . catMaybes
+    . take n
+
 {- / -}
 
-demo
-    :: Map String (Map Float String)
-    -> String
-    -> Float
-    -> Maybe (Float, String)
-demo xs k k' = lookup k xs >>= lookupGE k'
-
 example :: String
-example =
-    "This word is something and that word is something else. And, also, this \
-        \is that something and what else."
+example = "Still less must this kind of contentment, which holds science in contempt, take upon itself to claim that raving obscurantism of this sort is something higher than science. These apocalyptic utterances pretend to occupy the very centre and the deepest depths; they look askance at all definiteness and preciseness of meaning; and they deliberately hold back from conceptual thinking and the constraining necessities of thought, as being the sort of reflection which, they say, can only feel at home in the sphere of finitude. But just as there is a breadth which is emptiness, there is a depth which is empty too: as we may have an extension of substance which overflows into finite multiplicity without the power of keeping the manifold together, in the same way we may have an insubstantial intensity which, keeping itself in as mere force without actual expression, is no better than superficiality. The force of mind is only as great as its expression; its depth only as deep as its power to expand and lose itself when spending and giving out its substance. Moreover, when this unreflective emotional knowledge makes a pretence of having immersed its own very self in the depths of the absolute Being, and of philosophizing in all holiness and truth, it hides from itself the fact that instead of devotion to God, it rather, by this contempt for all measurable precision and definiteness, simply attests in its own case the fortuitous character of its content, and in the other endows God with its own caprice. When such minds commit themselves to the unrestrained ferment of sheer emotion, they think that, by putting a veil over self-consciousness, and surrendering all understanding, they are thus God’s beloved ones to whom He gives His wisdom in sleep. This is the reason, too, that in point of fact, what they do conceive and bring forth in sleep is dreams."
 
 {- / -}
 
 main :: IO ()
-main =
-    printEndline xs
-    >> printEndline (keys xs)
-    >> (randomIO :: IO Float)
-    >>= \k' -> printMaybe (demo xs "and" k')
+main = (print . sentence n) (iterate xs seed)
   where
-    xs = (chain . tokenize) example
+    seed = Just ("and", seedTFGen (0, 0, 0, 0))
+    xs = (generate . chain . tokenize) example
+    n = 24
