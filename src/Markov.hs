@@ -7,8 +7,15 @@ import Data.List (group, groupBy, sort, sortBy)
 import Data.Map.Strict (Map, keys, fromList, lookup, lookupGE)
 import System.Random (randomIO)
 
+{- / -}
+
+printEndline :: Show a => a -> IO ()
+printEndline x = putStrLn (show x ++ "\n")
+
 printMaybe :: Show a => Maybe a -> IO ()
 printMaybe = maybe (return ()) print
+
+{- / -}
 
 tally :: [String] -> (Int, [(String, Int)])
 tally =
@@ -17,26 +24,31 @@ tally =
     . group
     . sort
 
-total :: (Int, [(String, Int)]) -> String -> (String, [(String, Int, Int)])
-total (n, xs) = (, map (\(s, x) -> (s, x, n)) xs)
+arrange :: (Int, [(String, Int)]) -> String -> (String, [(String, Int, Int)])
+arrange (n, xs) = (, map (\(s, x) -> (s, x, n)) xs)
 
-stack :: (String, Int, Int) -> (String, Int, Int) -> (String, Int, Int)
-stack (_, x, _) (s, x', n) = (s, x + x', n)
+cumsum :: (String, Int, Int) -> (String, Int, Int) -> (String, Int, Int)
+cumsum (_, x, _) (s, x', n) = (s, x + x', n)
 
 percent :: (String, Int, Int) -> (Float, String)
 percent (s, x, n) = (fromIntegral x / fromIntegral n, s)
 
+pairsToDict :: [(String, String)] -> (String, Map Float String)
+pairsToDict =
+    (\(x, xs) -> (x, (fromList . map percent . scanl1 cumsum) xs))
+    .  uncurry arrange
+    . (\xs -> (tally $ map snd xs, fst $ head xs))
+
 chain :: String -> Map String (Map Float String)
 chain =
     fromList
-    . map
-        ( (\(x, xs) -> (x, (fromList . map percent . scanl1 stack) xs))
-        . (uncurry total . (\xs -> (tally $ map snd xs, fst $ head xs)))
-        )
+    . map pairsToDict
     . groupBy ((==) `on` fst)
     . sortBy (compare `on` fst)
     . (\xs -> zip xs $ tail xs)
     . words
+
+{- / -}
 
 demo
     :: Map String (Map Float String)
@@ -50,10 +62,12 @@ example =
     "this word is something and that word something else and this is that \
         \something and what else"
 
+{- / -}
+
 main :: IO ()
 main =
-    putStrLn (show xs ++ "\n")
-    >> putStrLn (show (keys xs) ++ "\n")
+    printEndline xs
+    >> printEndline (keys xs)
     >> (randomIO :: IO Float)
     >>= \k' -> printMaybe (demo xs "and" k')
   where
