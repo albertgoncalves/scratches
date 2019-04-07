@@ -12,14 +12,6 @@ import System.Random.TF (TFGen, seedTFGen)
 
 {- / -}
 
-printEndline :: Show a => a -> IO ()
-printEndline x = putStrLn (show x ++ "\n")
-
-printMaybe :: Show a => Maybe a -> IO ()
-printMaybe = maybe (return ()) print
-
-{- / -}
-
 tally :: [String] -> (Int, [(String, Int)])
 tally =
     (\xs -> (sum $ map snd xs, xs))
