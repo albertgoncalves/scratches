@@ -7,6 +7,9 @@ import Data.List (group, groupBy, sort, sortBy)
 import Data.Map.Strict (Map, keys, fromList, lookup, lookupGE)
 import System.Random (randomIO)
 
+printMaybe :: Show a => Maybe a -> IO ()
+printMaybe = maybe (return ()) print
+
 tally :: [String] -> (Int, [(String, Int)])
 tally =
     (\xs -> (sum $ map snd xs, xs))
@@ -18,7 +21,7 @@ total :: (Int, [(String, Int)]) -> String -> (String, [(String, Int, Int)])
 total (n, xs) = (, map (\(s, x) -> (s, x, n)) xs)
 
 stack :: (String, Int, Int) -> (String, Int, Int) -> (String, Int, Int)
-stack (_, x, n) (s, x', _) = (s, x + x', n)
+stack (_, x, _) (s, x', n) = (s, x + x', n)
 
 percent :: (String, Int, Int) -> (Float, String)
 percent (s, x, n) = (fromIntegral x / fromIntegral n, s)
@@ -35,20 +38,17 @@ chain =
     . (\xs -> zip xs $ tail xs)
     . words
 
+demo
+    :: Map String (Map Float String)
+    -> String
+    -> Float
+    -> Maybe (Float, String)
+demo xs k k' = lookup k xs >>= lookupGE k'
+
 example :: String
 example =
     "this word is something and that word something else and this is that \
         \something and what else"
-
-demo
-    :: (Map String (Map Float String))
-    -> String
-    -> Float
-    -> Maybe (Float, String)
-demo xs k k' = lookup k xs >>= (\xs' -> lookupGE k' xs')
-
-printMaybe :: Show a => Maybe a -> IO ()
-printMaybe = maybe (return ()) print
 
 main :: IO ()
 main =
