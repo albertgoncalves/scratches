@@ -2,6 +2,7 @@
 {-# LANGUAGE TupleSections #-}
 
 import Prelude hiding (lookup)
+import Data.Char (isAlphaNum, toLower)
 import Data.Function (on)
 import Data.List (group, groupBy, sort, sortBy)
 import Data.Map.Strict (Map, keys, fromList, lookup, lookupGE)
@@ -39,14 +40,20 @@ pairsToDict =
     .  uncurry arrange
     . (\xs -> (tally $ map snd xs, fst $ head xs))
 
-chain :: String -> Map String (Map Float String)
+tokenize :: String -> [String]
+tokenize =
+    filter (/= "")
+    . map (filter (\x -> isAlphaNum x || x == '\''))
+    . words
+    . map toLower
+
+chain :: [String] -> Map String (Map Float String)
 chain =
     fromList
     . map pairsToDict
     . groupBy ((==) `on` fst)
     . sortBy (compare `on` fst)
     . (\xs -> zip xs $ tail xs)
-    . words
 
 {- / -}
 
@@ -59,8 +66,8 @@ demo xs k k' = lookup k xs >>= lookupGE k'
 
 example :: String
 example =
-    "this word is something and that word something else and this is that \
-        \something and what else"
+    "This word is something and that word is something else. And, also, this \
+        \is that something and what else."
 
 {- / -}
 
@@ -71,4 +78,4 @@ main =
     >> (randomIO :: IO Float)
     >>= \k' -> printMaybe (demo xs "and" k')
   where
-    xs = chain example
+    xs = (chain . tokenize) example
