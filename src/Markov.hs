@@ -1,5 +1,4 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE TupleSections #-}
 
 import Data.Char (isAlphaNum, toLower)
 import Data.Function (on)
@@ -19,9 +18,9 @@ tokenize =
     . words
     . map toLower
 
-tally :: [String] -> (Int, [(String, Int)])
+tally :: [String] -> ([(String, Int)], Int)
 tally =
-    (\xs -> (sum $ map snd xs, xs))
+    (\xs -> (xs, sum $ map snd xs))
     . map (\xs -> (head xs, length xs))
     . group
     . sort
@@ -39,10 +38,11 @@ encode =
     . scanl1 accumulate
 
 transformPair :: [(String, String)] -> (String, Map Float String)
-transformPair =
-    (\(x, xs) -> (x, encode xs))
-    . (\((m, xs), x) -> (x, map (\(x', n) -> (x', n, m)) xs))
-    . (\xs -> (tally $ map snd xs, fst $ head xs))
+transformPair xs = (x, encode $ map f xs')
+  where
+    (xs', m) = tally (map snd xs)
+    x = fst (head xs)
+    f (x', n) = (x', n, m)
 
 chain :: [String] -> Map String (Map Float String)
 chain =
