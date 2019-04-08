@@ -4,11 +4,11 @@
 import Data.Char (isAlphaNum, toLower)
 import Data.Function (on)
 import Data.List (group, groupBy, sort, sortBy)
-import Data.Map.Strict (Map, fromDistinctAscList, lookup, lookupGE)
+import Data.Map.Strict (fromDistinctAscList, lookup, lookupGE, Map)
 import Data.Maybe (catMaybes)
 import Prelude hiding (lookup)
 import System.Random (random)
-import System.Random.TF (TFGen, seedTFGen)
+import System.Random.TF (seedTFGen, TFGen)
 
 {- / -}
 
@@ -26,14 +26,11 @@ tally =
     . group
     . sort
 
-arrange :: (Int, [(String, Int)]) -> String -> (String, [(String, Int, Int)])
-arrange (n, xs) = (, map (\(s, x) -> (s, x, n)) xs)
-
 accumulate :: (String, Int, Int) -> (String, Int, Int) -> (String, Int, Int)
-accumulate (_, x, _) (s, x', n) = (s, x + x', n)
+accumulate (_, n, _) (x, n', m) = (x, n + n', m)
 
 toFraction :: (String, Int, Int) -> (Float, String)
-toFraction (s, x, n) = (fromIntegral x / fromIntegral n, s)
+toFraction (x, n, m) = (fromIntegral n / fromIntegral m, x)
 
 encode :: [(String, Int, Int)] -> Map Float String
 encode =
@@ -41,16 +38,16 @@ encode =
     . map toFraction
     . scanl1 accumulate
 
-pairTransform :: [(String, String)] -> (String, Map Float String)
-pairTransform =
+transformPair :: [(String, String)] -> (String, Map Float String)
+transformPair =
     (\(x, xs) -> (x, encode xs))
-    .  uncurry arrange
+    . (\((m, xs), x) -> (x, map (\(x', n) -> (x', n, m)) xs))
     . (\xs -> (tally $ map snd xs, fst $ head xs))
 
 chain :: [String] -> Map String (Map Float String)
 chain =
     fromDistinctAscList
-    . map pairTransform
+    . map transformPair
     . groupBy ((==) `on` fst)
     . sortBy (compare `on` fst)
     . (\xs -> zip xs $ tail xs)
