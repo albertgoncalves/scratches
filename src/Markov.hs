@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE TupleSections #-}
 
 import Data.Char (isAlphaNum, toLower)
 import Data.Function (on)
@@ -37,41 +38,43 @@ encode =
     . map toFraction
     . scanl1 accumulate
 
-transformPair :: [(String, String)] -> (String, Map Float String)
+transformPair
+    :: [((String, String), String)]
+    -> ((String, String), Map Float String)
 transformPair xs = (x, encode $ map f xs')
   where
     (xs', m) = tally (map snd xs)
     x = fst (head xs)
     f (x', n) = (x', n, m)
 
-chain :: [String] -> Map String (Map Float String)
+chain :: [String] -> Map (String, String) (Map Float String)
 chain =
     fromDistinctAscList
     . map transformPair
     . groupBy ((==) `on` fst)
     . sortBy (compare `on` fst)
-    . (\xs -> zip xs $ tail xs)
+    . map (\(a, b, c) -> ((a, b), c))
+    . (\xs -> zip3 xs (tail xs) (tail $ tail xs))
 
 generate
-    :: Map String (Map Float String)
-    -> Maybe (String, TFGen)
-    -> Maybe (String, TFGen)
+    :: Map (String, String) (Map Float String)
+    -> Maybe ((String, String), TFGen)
+    -> Maybe ((String, String), TFGen)
 generate _ Nothing = Nothing
 generate xs (Just (k, g)) =
-    lookup k xs
-    >>= lookupGE k'
-    >>= \(_, v) -> return (v, g')
+    (, g') . (snd k, ) . snd
+    <$> (lookup k xs >>= lookupGE k')
   where
     (k', g') = random g
 
 writeSentence
     :: Int
-    -> (Maybe (String, a) -> Maybe (String, a))
-    -> Maybe (String, a)
+    -> (Maybe ((String, String), a) -> Maybe ((String, String), a))
+    -> Maybe ((String, String), a)
     -> String
 writeSentence n f =
     unwords
-    . map fst
+    . map (fst . fst)
     . catMaybes
     . take n
     . iterate f
@@ -86,6 +89,6 @@ example = "Still less must this kind of contentment, which holds science in cont
 main :: IO ()
 main = (print . writeSentence n f) seed
   where
-    seed = Just ("god", seedTFGen (0, 0, 0, 0))
+    seed = Just (("god", "with"), seedTFGen (0, 0, 0, 0))
     f = (generate . chain . tokenize) example
     n = 24
