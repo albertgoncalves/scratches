@@ -13,10 +13,7 @@ mean n xs = Just (sum xs / fromIntegral n)
 std :: Floating a => Int -> [a] -> Maybe a
 std _ [] = Nothing
 std _ [_] = Nothing
-std d xs =
-    mean n xs
-    >>= \mean' -> mean (n - d) (map (f mean') xs)
-    >>= Just . sqrt
+std d xs = sqrt <$> (mean n xs >>= \mean' -> mean (n - d) (map (f mean') xs))
   where
     n = length xs
     f x = (** 2) . (x -)
