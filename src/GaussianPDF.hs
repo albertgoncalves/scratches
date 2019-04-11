@@ -7,16 +7,18 @@ showFloat = printf "%.8f"
 
 mean :: (Integral a, Floating b) => a -> [b] -> Maybe b
 mean _ [] = Nothing
-mean 0 _ = Nothing
-mean n xs = Just (sum xs / fromIntegral n)
+mean n xs
+    | n <= 0 = Nothing
+    | otherwise = Just (sum xs / fromIntegral n)
 
 std :: Floating a => Int -> [a] -> Maybe a
 std _ [] = Nothing
 std _ [_] = Nothing
-std d xs = sqrt <$> (mean n xs >>= \mean' -> mean (n - d) (map (f mean') xs))
+std d xs = sqrt <$> (mean n xs >>= \mean' -> mean (n - d) $ map (f mean') xs)
   where
     n = length xs
     f x = (** 2) . (x -)
+
 
 gaussianPDF :: (Eq a, Floating a) => a -> a -> a -> Maybe a
 gaussianPDF _ 0 _ = Nothing
@@ -26,12 +28,9 @@ gaussianPDF mu sigma x = Just $ (1 / denom) * expon
     expon = (exp . negate) $ ((x - mu) ** 2) / (sigma' * 2)
     denom = sqrt (2 * pi * sigma')
 
-{-
- -  $ R
- -  > xs = ...
- -  > dnorm(xs, mean(xs), sd(xs))
- -}
-
+{- $ R
+   > xs = ...
+   > dnorm(xs, mean(xs), sd(xs)) -}
 autoGPDF:: (Eq a, Floating a) => [a] -> Maybe [a]
 autoGPDF xs =
     mean (length xs) xs
