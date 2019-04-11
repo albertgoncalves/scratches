@@ -11,14 +11,12 @@ mean n xs
     | n <= 0 = Nothing
     | otherwise = Just (sum xs / fromIntegral n)
 
-std :: Floating a => Int -> [a] -> Maybe a
-std _ [] = Nothing
-std _ [_] = Nothing
-std d xs = sqrt <$> (mean n xs >>= \mean' -> mean (n - d) $ map (f mean') xs)
+std :: (Integral a, Floating b) => a -> a -> [b] -> Maybe b
+std _ _ [] = Nothing
+std _ _ [_] = Nothing
+std n d xs = sqrt <$> (mean n xs >>= \mean' -> mean (n - d) $ map (f mean') xs)
   where
-    n = length xs
     f x = (** 2) . (x -)
-
 
 gaussianPDF :: (Eq a, Floating a) => a -> a -> a -> Maybe a
 gaussianPDF _ 0 _ = Nothing
@@ -33,9 +31,11 @@ gaussianPDF mu sigma x = Just $ (1 / denom) * expon
    > dnorm(xs, mean(xs), sd(xs)) -}
 autoGPDF:: (Eq a, Floating a) => [a] -> Maybe [a]
 autoGPDF xs =
-    mean (length xs) xs
-    >>= \mu -> std 1 xs
+    mean n xs
+    >>= \mu -> std n 1 xs
     >>= \sigma -> mapM (gaussianPDF mu sigma) xs
+  where
+    n = length xs
 
 pipeline :: [Float] -> IO ()
 pipeline =
