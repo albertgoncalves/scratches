@@ -2,9 +2,6 @@
 
 import Text.Printf (printf)
 
-showFloat :: Float -> String
-showFloat = printf "%.8f"
-
 mean :: (Integral a, Floating b) => a -> [b] -> Maybe b
 mean _ [] = Nothing
 mean n xs
@@ -40,8 +37,10 @@ autoGPDF xs =
 pipeline :: [Float] -> IO ()
 pipeline =
     putStrLn
-    . maybe "Nothing" (unlines . map showFloat)
+    . maybe "Nothing" (unlines . map f)
     . autoGPDF
+  where
+    f = printf "%.8f"
 
 main :: IO ()
 main = pipeline xs
@@ -57,4 +56,4 @@ main = pipeline xs
         , 0.1531161
         , -1.2940066
         , -0.9109157
-        ] :: [Float]
+        ]
