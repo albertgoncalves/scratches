@@ -3,9 +3,10 @@ with pkgs; mkShell {
     name = "Python";
     buildInputs = [
         (python37.withPackages(ps: with ps; [
+            flake8
             matplotlib
             numpy
-            flake8
+            scikitlearn
         ]))
         (haskell.packages.ghc864.ghcWithPackages (pkgs: [
             pkgs.containers
@@ -23,5 +24,9 @@ with pkgs; mkShell {
             alias ll='ls -al'
         fi
         alias flake8="flake8 --ignore E124,E128,E201,E203,E241,E731,W503"
+        export WD=$(pwd)
+        if [ ! -d pngs/ ]; then
+            mkdir pngs/
+        fi
     '';
 }
