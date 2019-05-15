@@ -8,7 +8,7 @@ with pkgs; mkShell {
             numpy
             scikitlearn
         ]))
-        (haskell.packages.ghc864.ghcWithPackages (pkgs: [
+        (haskell.packages.ghc865.ghcWithPackages (pkgs: [
             pkgs.containers
             pkgs.random
             pkgs.tf-random
